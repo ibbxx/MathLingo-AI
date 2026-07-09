@@ -12,6 +12,8 @@ use App\Models\QuizAttempt;
 use App\Models\StudentProfile;
 use App\Models\UserProgress;
 use App\Models\UserAchievement;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class DashboardService
 {
@@ -40,11 +42,11 @@ class DashboardService
         $lessonsCompletedTotal = $completedLessonIds->count();
 
         $lessonsToday = (clone $completedProgress)
-            ->whereDate('completed_at', $today)
+            ->where('completed_at', '>=', $today)
             ->count();
 
         $questionsToday = QuizAttempt::where('user_id', $user->id)
-            ->whereDate('answered_at', $today)
+            ->where('answered_at', '>=', $today)
             ->count();
 
         $totalLessonsActive = Lesson::where('is_active', true)->count();
@@ -133,22 +135,28 @@ class DashboardService
         }
 
         // ── Progress Vocabulary per course ──────────────────────────────────
+        $courseVocabTotals = Vocabulary::join('lessons', 'vocabularies.lesson_id', '=', 'lessons.id')
+            ->select('lessons.course_id', DB::raw('COUNT(*) as total'))
+            ->groupBy('lessons.course_id')
+            ->pluck('total', 'lessons.course_id');
+
+        $courseVocabMastered = Vocabulary::join('lessons', 'vocabularies.lesson_id', '=', 'lessons.id')
+            ->whereIn('vocabularies.lesson_id', $completedLessonIds)
+            ->select('lessons.course_id', DB::raw('COUNT(*) as total'))
+            ->groupBy('lessons.course_id')
+            ->pluck('total', 'lessons.course_id');
+
         $vocabProgress = [];
         foreach ($allCourses as $course) {
-            $courseVocabTotal = Vocabulary::whereHas('lesson', fn ($q) => $q->where('course_id', $course->id))->count();
+            $courseVocabTotal = $courseVocabTotals->get($course->id, 0);
 
             if ($courseVocabTotal === 0) {
                 continue;
             }
 
-            $courseVocabMastered = Vocabulary::whereHas('lesson', function ($q) use ($course, $completedLessonIds) {
-                $q->where('course_id', $course->id)
-                  ->whereIn('id', $completedLessonIds);
-            })->count();
-
             $vocabProgress[] = [
                 'name'     => $course->title,
-                'mastered' => $courseVocabMastered,
+                'mastered' => $courseVocabMastered->get($course->id, 0),
                 'total'    => $courseVocabTotal,
                 'color'    => $course->color,
             ];
@@ -216,14 +224,21 @@ class DashboardService
         $conversationIds = $user->conversations()->pluck('id');
         $aiMessagesQuery = AiMessage::whereIn('conversation_id', $conversationIds);
 
+        $startOfWeekLimit = now()->subDays(6)->startOfDay();
+        $weeklyCounts = AiMessage::whereIn('conversation_id', $conversationIds)
+            ->where('created_at', '>=', $startOfWeekLimit)
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as count'))
+            ->groupBy('date')
+            ->pluck('count', 'date');
+
         $chart = [];
         $dayLabels = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i);
-            $count = (clone $aiMessagesQuery)->whereDate('created_at', $date->toDateString())->count();
+            $dateString = $date->toDateString();
             $chart[] = [
                 'date'  => $dayLabels[$date->dayOfWeekIso - 1],
-                'count' => $count,
+                'count' => (int) ($weeklyCounts->get($dateString) ?? 0),
             ];
         }
 
@@ -233,7 +248,7 @@ class DashboardService
             'accuracy'             => 0,
             'total_conversations'  => $conversationIds->count(),
             'total_messages'       => (clone $aiMessagesQuery)->count(),
-            'today'                => (clone $aiMessagesQuery)->whereDate('created_at', $today)->count(),
+            'today'                => (clone $aiMessagesQuery)->where('created_at', '>=', $today)->count(),
             'this_week'            => (clone $aiMessagesQuery)->where('created_at', '>=', $startOfWeek)->count(),
             'this_month'           => (clone $aiMessagesQuery)->where('created_at', '>=', $startOfMonth)->count(),
             'weekly_activity'      => array_column($chart, 'count'),
@@ -241,18 +256,27 @@ class DashboardService
         ];
 
         // ── Leaderboard ──────────────────────────────────────────────────────
-        $leaderboard = StudentProfile::with('user:id,name,role')
-            ->whereHas('user', fn ($q) => $q->where('role', 'student'))
-            ->orderByDesc('xp_total')
-            ->take(10)
-            ->get()
-            ->map(fn ($p) => [
-                'name'   => $p->user->name ?? 'Pengguna',
-                'xp'     => $p->xp_total,
-                'color'  => $p->league_color,
-                'is_me'  => $p->user_id === $user->id,
-            ])
-            ->values();
+        $leaderboardData = Cache::remember('leaderboard_top_10', now()->addMinutes(15), function () {
+            return StudentProfile::with('user:id,name,role')
+                ->whereHas('user', fn ($q) => $q->where('role', 'student'))
+                ->orderByDesc('xp_total')
+                ->take(10)
+                ->get()
+                ->map(fn ($p) => [
+                    'name'    => $p->user->name ?? 'Pengguna',
+                    'xp'      => $p->xp_total,
+                    'color'   => $p->league_color,
+                    'user_id' => $p->user_id,
+                ])
+                ->toArray();
+        });
+
+        $leaderboard = collect($leaderboardData)->map(fn ($p) => [
+            'name'   => $p['name'],
+            'xp'     => $p['xp'],
+            'color'  => $p['color'],
+            'is_me'  => $p['user_id'] === $user->id,
+        ]);
 
         // ── Aktivitas terbaru ─────────────────────────────────────────────────
         $recentLessonActivities = UserProgress::with('lesson')
