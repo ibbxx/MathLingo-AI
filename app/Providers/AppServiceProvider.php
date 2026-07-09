@@ -14,10 +14,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Vercel serverless: redirect writable paths to /tmp
-        if ($this->isVercel()) {
-            $this->app->useStoragePath('/tmp/storage');
-        }
+        //
     }
 
     /**
@@ -32,13 +29,5 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->environment('production')) {
             URL::forceScheme('https');
         }
-    }
-
-    /**
-     * Detect if running on Vercel serverless environment.
-     */
-    private function isVercel(): bool
-    {
-        return !empty($_ENV['VERCEL']) || !empty(getenv('VERCEL'));
     }
 }
