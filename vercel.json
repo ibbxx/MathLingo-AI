@@ -1,7 +1,7 @@
 {
     "version": 2,
     "framework": null,
-    "buildCommand": "composer install --no-dev --optimize-autoloader --no-interaction && php artisan package:discover --ansi && php artisan config:clear && php artisan view:clear && npm install && npm run build",
+    "buildCommand": "npm install && npm run build",
     "outputDirectory": "public",
     "functions": {
         "api/index.php": {
