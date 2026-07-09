@@ -1,0 +1,14 @@
+.git
+node_modules
+storage/logs
+storage/framework/sessions
+storage/framework/views
+storage/framework/cache
+tests
+.env
+.env.backup
+ca.pem
+docker/
+Dockerfile
+.DS_Store
+mathlingo_ai.sql
