@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Facades\Storage;
+use App\Support\PublicStorage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -119,7 +119,12 @@ class Lesson extends Model
 
     public function getImageUrlAttribute(): ?string
     {
-        return $this->image ? Storage::url($this->image) : null;
+        return PublicStorage::url($this->image);
+    }
+
+    public function getPublicContentAttribute(): string
+    {
+        return PublicStorage::rewritePublicUrls($this->content);
     }
 
     public function getLessonTypeLabelAttribute(): string

@@ -325,7 +325,7 @@
                     Jika storage:link belum ada, img gagal load dan onerror menampilkan initials.
                 --}}
                 @if($authProfile && $authProfile->avatar_url)
-                    <img src="{{ Storage::url($authProfile->avatar_url) }}?v={{ $avatarTs }}"
+                    <img src="{{ \App\Support\PublicStorage::versionedUrl($authProfile->avatar_url, $avatarTs) }}"
                          alt="{{ $authUser->name }}"
                          style="width:100%;height:100%;object-fit:cover;display:block;"
                          onerror="this.remove();this.parentElement.style.background='';this.parentElement.innerHTML='{{ strtoupper(substr($authUser->name, 0, 2)) }}';">
@@ -409,7 +409,7 @@
             <button class="topbar-avatar-btn" id="avatar-btn" aria-label="Account menu">
                 <div class="topbar-avatar" @if($authProfile && $authProfile->avatar_url) style="background:transparent;" @endif>
                     @if($authProfile && $authProfile->avatar_url)
-                        <img src="{{ Storage::url($authProfile->avatar_url) }}?v={{ $avatarTs }}"
+                        <img src="{{ \App\Support\PublicStorage::versionedUrl($authProfile->avatar_url, $avatarTs) }}"
                              alt="{{ $authUser->name }}"
                              style="width:100%;height:100%;object-fit:cover;display:block;"
                              onerror="this.remove();this.parentElement.style.background='';this.parentElement.innerHTML='{{ strtoupper(substr($authUser->name ?? 'U', 0, 2)) }}';">

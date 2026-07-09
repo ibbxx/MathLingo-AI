@@ -5,12 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Http\Requests\PasswordUpdateRequest;
 use App\Models\StudentProfile;
+use App\Support\PublicStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -106,12 +106,11 @@ class ProfileController extends Controller
 
         try {
             // Hapus foto lama
-            if ($profile->avatar_url && Storage::disk('public')->exists($profile->avatar_url)) {
-                Storage::disk('public')->delete($profile->avatar_url);
+            if ($profile->avatar_url && PublicStorage::exists($profile->avatar_url)) {
+                PublicStorage::delete($profile->avatar_url);
             }
 
-            // Store file ke storage/app/public/avatars
-            $path = $request->file('avatar')->store('avatars', 'public');
+            $path = PublicStorage::store($request->file('avatar'), 'avatars');
 
             // Validasi: pastikan file benar-benar tersimpan
             if (! $path) {
@@ -119,7 +118,7 @@ class ProfileController extends Controller
                     ->with('error', 'Gagal menyimpan file. store() mengembalikan false.');
             }
 
-            if (! Storage::disk('public')->exists($path)) {
+            if (! PublicStorage::exists($path)) {
                 return Redirect::route('profile.edit')
                     ->with('error', 'File tidak ditemukan setelah disimpan. Path: ' . $path);
             }
@@ -147,8 +146,8 @@ class ProfileController extends Controller
         $profile = $user->profile;
 
         if ($profile && $profile->avatar_url) {
-            if (Storage::disk('public')->exists($profile->avatar_url)) {
-                Storage::disk('public')->delete($profile->avatar_url);
+            if (PublicStorage::exists($profile->avatar_url)) {
+                PublicStorage::delete($profile->avatar_url);
             }
             $profile->avatar_url = null;
             $profile->save();
@@ -183,8 +182,8 @@ class ProfileController extends Controller
         $profile = $user->profile;
 
         if ($profile && $profile->avatar_url) {
-            if (Storage::disk('public')->exists($profile->avatar_url)) {
-                Storage::disk('public')->delete($profile->avatar_url);
+            if (PublicStorage::exists($profile->avatar_url)) {
+                PublicStorage::delete($profile->avatar_url);
             }
         }
 

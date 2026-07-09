@@ -8,11 +8,11 @@ use App\Http\Requests\Admin\UpdateCourseRequest;
 use App\Models\Course;
 use App\Models\User;
 use App\Notifications\NewCourseAvailable;
+use App\Support\PublicStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class CourseController extends Controller
@@ -110,8 +110,7 @@ class CourseController extends Controller
         DB::transaction(function () use ($validated, $request) {
             // Handle thumbnail upload
             if ($request->hasFile('thumbnail')) {
-                $validated['thumbnail'] = $request->file('thumbnail')
-                    ->store('course-thumbnails', 'public');
+                $validated['thumbnail'] = PublicStorage::store($request->file('thumbnail'), 'course-thumbnails');
             }
 
             // Sync is_active with status
@@ -181,12 +180,11 @@ class CourseController extends Controller
             if ($request->hasFile('thumbnail')) {
                 // Delete old thumbnail
                 if ($course->thumbnail) {
-                    Storage::disk('public')->delete($course->thumbnail);
+                    PublicStorage::delete($course->thumbnail);
                 }
-                $validated['thumbnail'] = $request->file('thumbnail')
-                    ->store('course-thumbnails', 'public');
+                $validated['thumbnail'] = PublicStorage::store($request->file('thumbnail'), 'course-thumbnails');
             } elseif ($request->boolean('remove_thumbnail') && $course->thumbnail) {
-                Storage::disk('public')->delete($course->thumbnail);
+                PublicStorage::delete($course->thumbnail);
                 $validated['thumbnail'] = null;
             } else {
                 // Keep existing
@@ -325,7 +323,7 @@ class CourseController extends Controller
         $this->authorize('update', $course);
 
         if ($course->thumbnail) {
-            Storage::disk('public')->delete($course->thumbnail);
+            PublicStorage::delete($course->thumbnail);
             $course->update(['thumbnail' => null]);
         }
 

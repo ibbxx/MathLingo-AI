@@ -130,7 +130,7 @@
                 <div class="profile-card-top">
                     <div class="profile-avatar-lg">
                         @if($profile?->avatar_url)
-                            <img src="{{ Storage::url($profile->avatar_url) }}?v={{ $avatarTs }}"
+                            <img src="{{ \App\Support\PublicStorage::versionedUrl($profile->avatar_url, $avatarTs) }}"
                                  alt="{{ $user->name }}"
                                  onerror="this.remove();this.parentElement.innerHTML='{{ $initials }}';">
                         @else

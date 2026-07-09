@@ -137,7 +137,7 @@
                 <div class="avatar-upload-wrap">
                     <div class="avatar-preview" id="avatarPreview">
                         @if($user->profile?->avatar_url)
-                            <img src="{{ Storage::url($user->profile->avatar_url) }}?v={{ $avatarTs }}"
+                            <img src="{{ \App\Support\PublicStorage::versionedUrl($user->profile->avatar_url, $avatarTs) }}"
                                  id="avatarImg" alt="{{ $user->name }}"
                                  onerror="this.remove();document.getElementById('avatarPreview').innerHTML='{{ $initials }}';">
                         @else

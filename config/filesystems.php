@@ -15,6 +15,11 @@ return [
 
     'default' => env('FILESYSTEM_DISK', 'local'),
 
+    'public_assets_disk' => env(
+        'FILESYSTEM_PUBLIC_DISK',
+        env('AWS_BUCKET') && env('AWS_ENDPOINT') ? 's3' : env('FILESYSTEM_DISK', 'public')
+    ),
+
     /*
     |--------------------------------------------------------------------------
     | Filesystem Disks
@@ -56,8 +61,9 @@ return [
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
-            'throw' => false,
-            'report' => false,
+            'visibility' => 'public',
+            'throw' => env('FILESYSTEM_THROW', true),
+            'report' => env('FILESYSTEM_REPORT', false),
         ],
 
     ],

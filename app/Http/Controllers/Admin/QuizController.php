@@ -8,9 +8,9 @@ use App\Http\Requests\Admin\UpdateQuizRequest;
 use App\Models\Course;
 use App\Models\Lesson;
 use App\Models\Quiz;
+use App\Support\PublicStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class QuizController extends Controller
@@ -104,7 +104,7 @@ class QuizController extends Controller
             // File upload per-soal: soal.{i}.image
             $file = $request->file("soal.{$i}.image");
             if ($file) {
-                $item['image'] = $file->store('quiz-images', 'public');
+                $item['image'] = PublicStorage::store($file, 'quiz-images');
             } else {
                 unset($item['image']);
             }
@@ -149,11 +149,11 @@ class QuizController extends Controller
 
         if ($request->hasFile('image')) {
             if ($quiz->image) {
-                Storage::disk('public')->delete($quiz->image);
+                PublicStorage::delete($quiz->image);
             }
-            $data['image'] = $request->file('image')->store('quiz-images', 'public');
+            $data['image'] = PublicStorage::store($request->file('image'), 'quiz-images');
         } elseif ($request->boolean('remove_image') && $quiz->image) {
-            Storage::disk('public')->delete($quiz->image);
+            PublicStorage::delete($quiz->image);
             $data['image'] = null;
         } else {
             unset($data['image']);
@@ -175,7 +175,7 @@ class QuizController extends Controller
         $lessonId = $quiz->lesson_id;
 
         if ($quiz->image) {
-            Storage::disk('public')->delete($quiz->image);
+            PublicStorage::delete($quiz->image);
         }
 
         $quiz->delete();

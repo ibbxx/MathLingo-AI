@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Facades\Storage;
+use App\Support\PublicStorage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -213,7 +213,7 @@ class Course extends Model
         if (! $this->thumbnail) {
             return null;
         }
-        return Storage::url($this->thumbnail);
+        return PublicStorage::url($this->thumbnail);
     }
 
     public function getEstimatedDurationAttribute(): int

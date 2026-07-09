@@ -7,10 +7,10 @@ use App\Http\Requests\Admin\StoreLessonRequest;
 use App\Http\Requests\Admin\UpdateLessonRequest;
 use App\Models\Course;
 use App\Models\Lesson;
+use App\Support\PublicStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -111,7 +111,7 @@ class LessonController extends Controller
         $validated = $request->validated();
 
         if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('lesson-images', 'public');
+            $validated['image'] = PublicStorage::store($request->file('image'), 'lesson-images');
         } else {
             unset($validated['image']);
         }
@@ -187,11 +187,11 @@ class LessonController extends Controller
 
         if ($request->hasFile('image')) {
             if ($lesson->image) {
-                Storage::disk('public')->delete($lesson->image);
+                PublicStorage::delete($lesson->image);
             }
-            $validated['image'] = $request->file('image')->store('lesson-images', 'public');
+            $validated['image'] = PublicStorage::store($request->file('image'), 'lesson-images');
         } elseif ($request->boolean('remove_image') && $lesson->image) {
-            Storage::disk('public')->delete($lesson->image);
+            PublicStorage::delete($lesson->image);
             $validated['image'] = null;
         } else {
             unset($validated['image']);
@@ -216,7 +216,7 @@ class LessonController extends Controller
         $title = $lesson->title;
 
         if ($lesson->image) {
-            Storage::disk('public')->delete($lesson->image);
+            PublicStorage::delete($lesson->image);
         }
 
         $lesson->delete();
@@ -236,10 +236,10 @@ class LessonController extends Controller
             'image' => ['required', 'image', 'mimes:jpeg,jpg,png,webp,gif', 'max:4096'],
         ]);
 
-        $path = $request->file('image')->store('lesson-content-images', 'public');
+        $path = PublicStorage::store($request->file('image'), 'lesson-content-images');
 
         return response()->json([
-            'url' => Storage::disk('public')->url($path),
+            'url' => PublicStorage::url($path),
         ]);
     }
 

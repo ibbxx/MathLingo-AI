@@ -6,12 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreUserRequest;
 use App\Http\Requests\Admin\UpdateUserRequest;
 use App\Models\User;
-use App\Models\StudentProfile;
+use App\Support\PublicStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class UserController extends Controller
@@ -117,7 +116,7 @@ class UserController extends Controller
 
                 // Upload avatar jika ada
                 if ($request->hasFile('avatar')) {
-                    $path = $request->file('avatar')->store('avatars', 'public');
+                    $path = PublicStorage::store($request->file('avatar'), 'avatars');
                     $profileData['avatar_url'] = $path;
                 }
 
@@ -194,10 +193,10 @@ class UserController extends Controller
 
                 if ($request->hasFile('avatar')) {
                     // Hapus avatar lama
-                    if ($user->profile?->avatar_url && Storage::disk('public')->exists($user->profile->avatar_url)) {
-                        Storage::disk('public')->delete($user->profile->avatar_url);
+                    if ($user->profile?->avatar_url && PublicStorage::exists($user->profile->avatar_url)) {
+                        PublicStorage::delete($user->profile->avatar_url);
                     }
-                    $profileData['avatar_url'] = $request->file('avatar')->store('avatars', 'public');
+                    $profileData['avatar_url'] = PublicStorage::store($request->file('avatar'), 'avatars');
                 }
 
                 if ($user->profile) {
@@ -229,8 +228,8 @@ class UserController extends Controller
     {
         $profile = $user->profile;
         if ($profile && $profile->avatar_url) {
-            if (Storage::disk('public')->exists($profile->avatar_url)) {
-                Storage::disk('public')->delete($profile->avatar_url);
+            if (PublicStorage::exists($profile->avatar_url)) {
+                PublicStorage::delete($profile->avatar_url);
             }
             $profile->avatar_url = null;
             $profile->save();
@@ -249,8 +248,8 @@ class UserController extends Controller
 
         // Hapus avatar dari storage
         $profile = $user->profile;
-        if ($profile && $profile->avatar_url && Storage::disk('public')->exists($profile->avatar_url)) {
-            Storage::disk('public')->delete($profile->avatar_url);
+        if ($profile && $profile->avatar_url && PublicStorage::exists($profile->avatar_url)) {
+            PublicStorage::delete($profile->avatar_url);
         }
 
         $name = $user->name;

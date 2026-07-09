@@ -8,9 +8,9 @@ use App\Http\Requests\Admin\UpdateVocabularyRequest;
 use App\Models\Course;
 use App\Models\Lesson;
 use App\Models\Vocabulary;
+use App\Support\PublicStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class VocabularyController extends Controller
@@ -93,7 +93,7 @@ class VocabularyController extends Controller
         $data = $request->validated();
 
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('vocabulary-images', 'public');
+            $data['image'] = PublicStorage::store($request->file('image'), 'vocabulary-images');
         } else {
             unset($data['image']);
         }
@@ -128,11 +128,11 @@ class VocabularyController extends Controller
 
         if ($request->hasFile('image')) {
             if ($vocabulary->image) {
-                Storage::disk('public')->delete($vocabulary->image);
+                PublicStorage::delete($vocabulary->image);
             }
-            $data['image'] = $request->file('image')->store('vocabulary-images', 'public');
+            $data['image'] = PublicStorage::store($request->file('image'), 'vocabulary-images');
         } elseif ($request->boolean('remove_image') && $vocabulary->image) {
-            Storage::disk('public')->delete($vocabulary->image);
+            PublicStorage::delete($vocabulary->image);
             $data['image'] = null;
         } else {
             unset($data['image']);
@@ -156,7 +156,7 @@ class VocabularyController extends Controller
         $lessonId = $vocabulary->lesson_id;
 
         if ($vocabulary->image) {
-            Storage::disk('public')->delete($vocabulary->image);
+            PublicStorage::delete($vocabulary->image);
         }
 
         $vocabulary->delete();

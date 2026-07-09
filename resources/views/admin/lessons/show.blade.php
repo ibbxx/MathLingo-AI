@@ -306,7 +306,7 @@
             <span class="panel-title">Konten Pelajaran</span>
         </div>
         @if($lesson->content)
-            <div class="content-preview">{!! $lesson->content !!}</div>
+            <div class="content-preview">{!! $lesson->public_content !!}</div>
         @else
             <div class="content-empty">Belum ada konten. <a href="{{ route('admin.lessons.edit', $lesson) }}" style="color:var(--color-primary);">Tambahkan konten</a></div>
         @endif

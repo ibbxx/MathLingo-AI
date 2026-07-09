@@ -93,7 +93,7 @@
             <label>File Audio</label>
             @if($vocabulary->audio_path)
             <div class="audio-current">
-                <audio controls src="{{ Storage::url($vocabulary->audio_path) }}" style="height:32px;"></audio>
+                <audio controls src="{{ $vocabulary->audio_url }}" style="height:32px;"></audio>
                 <label style="font-weight:500;display:flex;align-items:center;gap:5px;margin:0;">
                     <input type="checkbox" name="remove_audio" value="1" style="width:auto;"> Hapus audio
                 </label>

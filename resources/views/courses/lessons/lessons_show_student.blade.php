@@ -544,7 +544,7 @@
                     </div>
                     <div class="card-body">
                         <div class="content-prose">
-                            {!! $lesson->content !!}
+                            {!! $lesson->public_content !!}
                         </div>
                     </div>
                 </div>
