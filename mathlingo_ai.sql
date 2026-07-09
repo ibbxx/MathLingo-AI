@@ -550,9 +550,9 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `name`, `username`, `email`, `role`, `status`, `phone`, `email_verified_at`, `password`, `remember_token`, `created_at`, `updated_at`) VALUES
 (2, 'miftah Nurrazzaq', 'Miftah', 'miftahnurrazzaq01@gmail.com', 'student', 'active', '0882021973462', NULL, '$2y$12$v5891GUfyi10yzet.GnDOey8XruSJyuFUEl2o2.FitUN410mI0yEu', 'xkjNFocpJKp3IVLqARDcZSMb6VicSZtrLeCdSj0e3U2fKMthEAX8wv3r5h7M', '2026-06-25 03:14:06', '2026-06-27 09:21:02'),
-(3, 'Admin1', NULL, 'admin1mathlinggo@gmail.com', 'admin', 'active', NULL, NULL, '$2y$12$xFEp9Ct78TcO2tAwfU1HcOr9qVNdzy21Gv58aoRwlrDDbfa9Nehy2', 'siYwy1iNncqsGDe3gYf87rrC6xtElEhjIuxQUVDmLwsiw3gxGDpPSFrRYfFO', '2026-06-27 19:44:41', '2026-06-27 19:44:41'),
-(4, 'admin2', NULL, 'admin2mathlinggo@gmail.com', 'admin', 'active', NULL, NULL, '$2y$12$W.zWH6/PW6wFlV3gwIEvleUWwHXPdS53TmIXGitl61C78hkipacB2', NULL, '2026-06-27 22:53:06', '2026-06-27 22:53:06'),
-(5, 'admin3', NULL, 'admin3mathlinggo@gmail.com', 'admin', 'active', NULL, NULL, '$2y$12$CPF2KjtX8Tl1WgjkuSxi1uIfJ5PnumGQOHyEgIccnBCj.CYc0ZnDi', NULL, '2026-06-27 22:54:20', '2026-06-27 22:54:20'),
+(3, 'Admin1', NULL, 'admin1mathlinggo@gmail.com', 'admin', 'active', NULL, NULL, '$2y$12$tyjw0r6CkLDa7ct94yjHxeWssH9DmevwcuhAzrde2YtTm3l20c5ui', 'siYwy1iNncqsGDe3gYf87rrC6xtElEhjIuxQUVDmLwsiw3gxGDpPSFrRYfFO', '2026-06-27 19:44:41', '2026-06-27 19:44:41'),
+(4, 'admin2', NULL, 'admin2mathlinggo@gmail.com', 'admin', 'active', NULL, NULL, '$2y$12$JqLeFiClN.Qxp8mRlx6TX.JSZTmYc0NPqh6qBz4BTE2oLSVnP2kli', NULL, '2026-06-27 22:53:06', '2026-06-27 22:53:06'),
+(5, 'admin3', NULL, 'admin3mathlinggo@gmail.com', 'admin', 'active', NULL, NULL, '$2y$12$EBlHmQ8StllbVEYkjszKkuUwbPI15eLnUweZd5sOby3lHS6eHcbuq', NULL, '2026-06-27 22:54:20', '2026-06-27 22:54:20'),
 (6, 'Azizah', NULL, 'azizah@gmail.com', 'student', 'active', NULL, NULL, '$2y$12$shyP8QI2BmJu5aRXfsSwOOF2DDez1frJ56HapyBxI.pnnqk4TDpfG', 'IiuhA6uezY3Xlms5OHhuI6fWyXavqtRmV4uqLDtkUQ1rCDLSxrmz2FWoaJnm', '2026-06-29 04:31:36', '2026-06-29 04:31:36'),
 (7, 'guru', NULL, 'guruku@gmail.com', 'student', 'active', NULL, NULL, '$2y$12$Dem66/cxCpm/6GD7MmWAKefpqlEcPhY8.5oJRRQUYBnYzoqMFalii', NULL, '2026-07-01 22:14:04', '2026-07-01 22:14:04'),
 (8, 'Lathifa', NULL, 'tifa@gmail.com', 'student', 'active', NULL, NULL, '$2y$12$aQvyoMWT8hjb7JnJKDlILezThDWtL./QIypqPOyWA.UQ.Ovgb7X9W', NULL, '2026-07-02 21:33:32', '2026-07-02 21:33:32'),
@@ -690,7 +690,8 @@ ALTER TABLE `ai_conversations`
 --
 ALTER TABLE `ai_messages`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `conversation_id` (`conversation_id`);
+  ADD KEY `conversation_id` (`conversation_id`),
+  ADD KEY `idx_ai_messages_conversation_created` (`conversation_id`,`created_at` DESC);
 
 --
 -- Indexes for table `cache`
@@ -721,7 +722,8 @@ ALTER TABLE `certificates`
 ALTER TABLE `courses`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `courses_slug_unique` (`slug`),
-  ADD KEY `idx_courses_deleted_at` (`deleted_at`);
+  ADD KEY `idx_courses_deleted_at` (`deleted_at`),
+  ADD KEY `idx_courses_active_sort` (`is_active`,`sort_order`);
 
 --
 -- Indexes for table `failed_jobs`
@@ -750,7 +752,8 @@ ALTER TABLE `job_batches`
 ALTER TABLE `lessons`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `lessons_course_slug_unique` (`course_id`,`slug`),
-  ADD KEY `lessons_course_id_foreign` (`course_id`);
+  ADD KEY `lessons_course_id_foreign` (`course_id`),
+  ADD KEY `idx_lessons_course_active_sort` (`course_id`,`is_active`,`sort_order`);
 
 --
 -- Indexes for table `migrations`
@@ -783,7 +786,8 @@ ALTER TABLE `quizzes`
 --
 ALTER TABLE `quiz_attempts`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `unique_user_quiz` (`user_id`,`quiz_id`);
+  ADD UNIQUE KEY `unique_user_quiz` (`user_id`,`quiz_id`),
+  ADD KEY `idx_quiz_attempts_user_answered` (`user_id`,`answered_at`);
 
 --
 -- Indexes for table `sessions`
@@ -798,7 +802,8 @@ ALTER TABLE `sessions`
 --
 ALTER TABLE `student_profiles`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `student_profiles_user_id_unique` (`user_id`);
+  ADD UNIQUE KEY `student_profiles_user_id_unique` (`user_id`),
+  ADD KEY `idx_student_profiles_xp_total` (`xp_total` DESC);
 
 --
 -- Indexes for table `users`
@@ -835,7 +840,8 @@ ALTER TABLE `user_progress`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `user_progress_user_course_lesson_unique` (`user_id`,`course_id`,`lesson_id`),
   ADD KEY `user_progress_course_id_foreign` (`course_id`),
-  ADD KEY `user_progress_lesson_id_foreign` (`lesson_id`);
+  ADD KEY `user_progress_lesson_id_foreign` (`lesson_id`),
+  ADD KEY `idx_user_progress_user_status_completed` (`user_id`,`status`,`completed_at` DESC);
 
 --
 -- Indexes for table `vocabularies`
