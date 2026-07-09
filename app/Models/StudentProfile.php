@@ -39,6 +39,16 @@ class StudentProfile extends Model
         'hearts_max' => 'integer',
     ];
 
+    protected $attributes = [
+        'current_level' => 1,
+        'xp_total' => 0,
+        'xp_today' => 0,
+        'streak_days' => 0,
+        'gems' => 0,
+        'hearts' => 5,
+        'hearts_max' => 5,
+    ];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -107,14 +117,18 @@ class StudentProfile extends Model
 
     public function getXpToNextLevelAttribute(): int
     {
-        return $this->current_level * 100;
+        $level = $this->current_level ?: 1;
+        return $level * 100;
     }
 
     public function getLevelProgressPercentAttribute(): int
     {
         $needed = $this->xp_to_next_level;
+        if ($needed <= 0) {
+            return 0;
+        }
         $xpInCurrentLevel = $this->xp_total % $needed;
-        return $needed > 0 ? (int) round(($xpInCurrentLevel / $needed) * 100) : 0;
+        return (int) round(($xpInCurrentLevel / $needed) * 100);
     }
 
     public function updateStreak(): void

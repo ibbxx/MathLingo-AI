@@ -337,7 +337,7 @@
                             <div>
                                 <div class="thumb-current-label">Thumbnail saat ini:</div>
                                 <div class="thumb-current">
-                                    <img src="{{ asset('storage/'.$course->thumbnail) }}" alt="{{ $course->title }}">
+                                    <img src="{{ Storage::url($course->thumbnail) }}" alt="{{ $course->title }}">
                                     <button type="button" class="btn-remove-thumb" onclick="markRemoveThumb()" title="Hapus thumbnail">×</button>
                                     <input type="hidden" name="remove_thumbnail" id="removeThumbInput" value="0">
                                 </div>

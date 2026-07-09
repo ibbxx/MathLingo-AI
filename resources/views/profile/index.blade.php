@@ -410,7 +410,7 @@
             <div class="profile-avatar-hero" @if($profile && $profile->avatar_url) style="background:transparent;backdrop-filter:none;" @endif>
                 {{-- BUG FIX B: cache-bust + onerror fallback --}}
                 @if($profile && $profile->avatar_url)
-                    <img src="{{ asset('storage/' . $profile->avatar_url) }}?v={{ $avatarTs }}"
+                    <img src="{{ Storage::url($profile->avatar_url) }}?v={{ $avatarTs }}"
                          alt="Foto profil {{ $user->name }}"
                          onerror="this.remove();this.parentElement.style.background='';this.parentElement.style.backdropFilter='';this.parentElement.innerHTML='{{ strtoupper(substr($user->name, 0, 2)) }}';">
                 @else

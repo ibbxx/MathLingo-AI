@@ -17,3 +17,4 @@ yarn-error.log
 
 # Aiven SSL CA Certificate
 ca.pem
+/composer.phar

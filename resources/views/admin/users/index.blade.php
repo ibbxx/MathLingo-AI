@@ -343,7 +343,7 @@ tbody td { padding: 14px 16px; font-size: 13.5px; color: var(--color-text); vert
                                 <div class="user-cell">
                                     <div class="user-avatar">
                                         @if($user->profile?->avatar_url)
-                                            <img src="{{ asset('storage/' . $user->profile->avatar_url) }}?v={{ $avatarTs }}"
+                                            <img src="{{ Storage::url($user->profile->avatar_url) }}?v={{ $avatarTs }}"
                                                  alt="{{ $user->name }}"
                                                  onerror="this.remove();this.parentElement.innerHTML='{{ $initials }}';">
                                         @else

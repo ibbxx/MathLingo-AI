@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -46,7 +47,7 @@ class Vocabulary extends Model
             return null;
         }
 
-        return asset('storage/' . $this->image);
+        return Storage::url($this->image);
     }
 
     public function getAudioUrlAttribute(): ?string
@@ -59,6 +60,6 @@ class Vocabulary extends Model
             return $this->audio_path;
         }
 
-        return asset('storage/' . $this->audio_path);
+        return Storage::url($this->audio_path);
     }
 }

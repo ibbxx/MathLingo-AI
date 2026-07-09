@@ -368,7 +368,7 @@
                     <div class="avatar-preview" id="avatarPreviewCircle" @if($profile && $profile->avatar_url) style="background:transparent;" @endif>
                         {{-- BUG FIX C: cache-bust + onerror fallback --}}
                         @if($profile && $profile->avatar_url)
-                            <img src="{{ asset('storage/' . $profile->avatar_url) }}?v={{ $avatarTs }}"
+                            <img src="{{ Storage::url($profile->avatar_url) }}?v={{ $avatarTs }}"
                                  alt="Foto profil"
                                  id="avatarCurrentImg"
                                  onerror="this.remove();this.parentElement.style.background='';document.getElementById('avatarInitials').style.display='';">
