@@ -42,5 +42,23 @@ foreach ($tmpDirs as $dir) {
     }
 }
 
-// ── 5. Bootstrap Laravel ─────────────────────────────────────────────────
+// ── 5. Purge stale bootstrap cache (prevents dev-only provider errors) ───
+$staleCacheFiles = [
+    __DIR__ . '/../bootstrap/cache/services.php',
+    __DIR__ . '/../bootstrap/cache/packages.php',
+    __DIR__ . '/../bootstrap/cache/config.php',
+];
+
+foreach ($staleCacheFiles as $cacheFile) {
+    if (file_exists($cacheFile)) {
+        @unlink($cacheFile);
+    }
+}
+
+// Set VIEW_COMPILED_PATH to writable /tmp location
+$_ENV['VIEW_COMPILED_PATH'] = '/tmp/storage/framework/views';
+$_SERVER['VIEW_COMPILED_PATH'] = '/tmp/storage/framework/views';
+putenv('VIEW_COMPILED_PATH=/tmp/storage/framework/views');
+
+// ── 6. Bootstrap Laravel ─────────────────────────────────────────────────
 require __DIR__ . '/../public/index.php';
