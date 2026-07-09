@@ -105,11 +105,6 @@ class ProfileController extends Controller
         $profile = $this->ensureProfile($user);
 
         try {
-            // Hapus foto lama
-            if ($profile->avatar_url && PublicStorage::exists($profile->avatar_url)) {
-                PublicStorage::delete($profile->avatar_url);
-            }
-
             $path = PublicStorage::store($request->file('avatar'), 'avatars');
 
             // Validasi: pastikan file benar-benar tersimpan
@@ -146,9 +141,6 @@ class ProfileController extends Controller
         $profile = $user->profile;
 
         if ($profile && $profile->avatar_url) {
-            if (PublicStorage::exists($profile->avatar_url)) {
-                PublicStorage::delete($profile->avatar_url);
-            }
             $profile->avatar_url = null;
             $profile->save();
         }
@@ -180,12 +172,6 @@ class ProfileController extends Controller
 
         $user    = $request->user();
         $profile = $user->profile;
-
-        if ($profile && $profile->avatar_url) {
-            if (PublicStorage::exists($profile->avatar_url)) {
-                PublicStorage::delete($profile->avatar_url);
-            }
-        }
 
         Auth::logout();
         $user->delete();

@@ -186,12 +186,8 @@ class LessonController extends Controller
         $validated = $request->validated();
 
         if ($request->hasFile('image')) {
-            if ($lesson->image) {
-                PublicStorage::delete($lesson->image);
-            }
             $validated['image'] = PublicStorage::store($request->file('image'), 'lesson-images');
-        } elseif ($request->boolean('remove_image') && $lesson->image) {
-            PublicStorage::delete($lesson->image);
+        } elseif ($request->boolean('remove_image')) {
             $validated['image'] = null;
         } else {
             unset($validated['image']);
@@ -214,10 +210,6 @@ class LessonController extends Controller
     public function destroy(Lesson $lesson): RedirectResponse
     {
         $title = $lesson->title;
-
-        if ($lesson->image) {
-            PublicStorage::delete($lesson->image);
-        }
 
         $lesson->delete();
 

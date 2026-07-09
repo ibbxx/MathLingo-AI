@@ -148,12 +148,8 @@ class QuizController extends Controller
         $data = $request->validated();
 
         if ($request->hasFile('image')) {
-            if ($quiz->image) {
-                PublicStorage::delete($quiz->image);
-            }
             $data['image'] = PublicStorage::store($request->file('image'), 'quiz-images');
-        } elseif ($request->boolean('remove_image') && $quiz->image) {
-            PublicStorage::delete($quiz->image);
+        } elseif ($request->boolean('remove_image')) {
             $data['image'] = null;
         } else {
             unset($data['image']);
@@ -173,10 +169,6 @@ class QuizController extends Controller
     public function destroy(Quiz $quiz): RedirectResponse
     {
         $lessonId = $quiz->lesson_id;
-
-        if ($quiz->image) {
-            PublicStorage::delete($quiz->image);
-        }
 
         $quiz->delete();
 

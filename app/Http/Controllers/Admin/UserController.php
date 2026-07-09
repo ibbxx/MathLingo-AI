@@ -192,10 +192,6 @@ class UserController extends Controller
                 ];
 
                 if ($request->hasFile('avatar')) {
-                    // Hapus avatar lama
-                    if ($user->profile?->avatar_url && PublicStorage::exists($user->profile->avatar_url)) {
-                        PublicStorage::delete($user->profile->avatar_url);
-                    }
                     $profileData['avatar_url'] = PublicStorage::store($request->file('avatar'), 'avatars');
                 }
 
@@ -228,9 +224,6 @@ class UserController extends Controller
     {
         $profile = $user->profile;
         if ($profile && $profile->avatar_url) {
-            if (PublicStorage::exists($profile->avatar_url)) {
-                PublicStorage::delete($profile->avatar_url);
-            }
             $profile->avatar_url = null;
             $profile->save();
         }
@@ -244,12 +237,6 @@ class UserController extends Controller
         if ($user->id === auth()->id()) {
             return redirect()->route('admin.users.index')
                 ->with('error', 'Tidak dapat menghapus akun Anda sendiri.');
-        }
-
-        // Hapus avatar dari storage
-        $profile = $user->profile;
-        if ($profile && $profile->avatar_url && PublicStorage::exists($profile->avatar_url)) {
-            PublicStorage::delete($profile->avatar_url);
         }
 
         $name = $user->name;

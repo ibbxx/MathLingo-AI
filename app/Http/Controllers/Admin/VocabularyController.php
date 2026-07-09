@@ -127,12 +127,8 @@ class VocabularyController extends Controller
         $data = $request->validated();
 
         if ($request->hasFile('image')) {
-            if ($vocabulary->image) {
-                PublicStorage::delete($vocabulary->image);
-            }
             $data['image'] = PublicStorage::store($request->file('image'), 'vocabulary-images');
-        } elseif ($request->boolean('remove_image') && $vocabulary->image) {
-            PublicStorage::delete($vocabulary->image);
+        } elseif ($request->boolean('remove_image')) {
             $data['image'] = null;
         } else {
             unset($data['image']);
@@ -154,10 +150,6 @@ class VocabularyController extends Controller
     {
         $term = $vocabulary->term;
         $lessonId = $vocabulary->lesson_id;
-
-        if ($vocabulary->image) {
-            PublicStorage::delete($vocabulary->image);
-        }
 
         $vocabulary->delete();
 

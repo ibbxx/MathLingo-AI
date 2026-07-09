@@ -178,13 +178,8 @@ class CourseController extends Controller
 
             // Handle thumbnail
             if ($request->hasFile('thumbnail')) {
-                // Delete old thumbnail
-                if ($course->thumbnail) {
-                    PublicStorage::delete($course->thumbnail);
-                }
                 $validated['thumbnail'] = PublicStorage::store($request->file('thumbnail'), 'course-thumbnails');
-            } elseif ($request->boolean('remove_thumbnail') && $course->thumbnail) {
-                PublicStorage::delete($course->thumbnail);
+            } elseif ($request->boolean('remove_thumbnail')) {
                 $validated['thumbnail'] = null;
             } else {
                 // Keep existing
@@ -323,7 +318,6 @@ class CourseController extends Controller
         $this->authorize('update', $course);
 
         if ($course->thumbnail) {
-            PublicStorage::delete($course->thumbnail);
             $course->update(['thumbnail' => null]);
         }
 
