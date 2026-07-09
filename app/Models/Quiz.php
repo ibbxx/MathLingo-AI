@@ -50,6 +50,21 @@ class Quiz extends Model
         'is_active'          => 'boolean',
     ];
 
+    protected static function booted(): void
+    {
+        static::deleting(function (Quiz $quiz) {
+            if ($quiz->image) {
+                PublicStorage::delete($quiz->image);
+            }
+        });
+
+        static::updated(function (Quiz $quiz) {
+            if ($quiz->wasChanged('image') && $quiz->getOriginal('image')) {
+                PublicStorage::delete($quiz->getOriginal('image'));
+            }
+        });
+    }
+
     public function lesson(): BelongsTo
     {
         return $this->belongsTo(Lesson::class);

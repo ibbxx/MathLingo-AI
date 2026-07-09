@@ -55,6 +55,38 @@ class Lesson extends Model
                 $lesson->slug = static::generateUniqueSlug($lesson->title, $lesson->course_id);
             }
         });
+
+        static::deleting(function (Lesson $lesson) {
+            // Trigger child model cleanup before database cascade removes their rows.
+            foreach ($lesson->vocabularies as $vocab) {
+                $vocab->delete();
+            }
+
+            foreach ($lesson->quizzes as $quiz) {
+                $quiz->delete();
+            }
+
+            if ($lesson->image) {
+                PublicStorage::delete($lesson->image);
+            }
+
+            PublicStorage::deleteImagesFromHtml($lesson->content);
+        });
+
+        static::updated(function (Lesson $lesson) {
+            if ($lesson->wasChanged('image') && $lesson->getOriginal('image')) {
+                PublicStorage::delete($lesson->getOriginal('image'));
+            }
+
+            if ($lesson->wasChanged('content')) {
+                $oldPaths = PublicStorage::imagePathsFromHtml($lesson->getOriginal('content'));
+                $newPaths = PublicStorage::imagePathsFromHtml($lesson->content);
+
+                foreach (array_diff($oldPaths, $newPaths) as $path) {
+                    PublicStorage::delete($path);
+                }
+            }
+        });
     }
 
     public static function generateUniqueSlug(string $title, int $courseId, ?int $exceptId = null): string

@@ -59,6 +59,16 @@ class User extends Authenticatable
 
     // ── Relationships ─────────────────────────────────────────────────────
 
+    protected static function booted(): void
+    {
+        static::deleting(function (User $user) {
+            $profile = $user->profile;
+            if ($profile) {
+                $profile->delete();
+            }
+        });
+    }
+
     public function profile(): HasOne
     {
         return $this->hasOne(StudentProfile::class);

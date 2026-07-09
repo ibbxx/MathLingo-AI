@@ -31,6 +31,21 @@ class Vocabulary extends Model
         'sort_order' => 'integer',
     ];
 
+    protected static function booted(): void
+    {
+        static::deleting(function (Vocabulary $vocabulary) {
+            if ($vocabulary->image) {
+                PublicStorage::delete($vocabulary->image);
+            }
+        });
+
+        static::updated(function (Vocabulary $vocabulary) {
+            if ($vocabulary->wasChanged('image') && $vocabulary->getOriginal('image')) {
+                PublicStorage::delete($vocabulary->getOriginal('image'));
+            }
+        });
+    }
+
     public function lesson(): BelongsTo
     {
         return $this->belongsTo(Lesson::class);

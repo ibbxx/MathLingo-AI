@@ -69,6 +69,24 @@ class Course extends Model
                 $course->slug = static::generateUniqueSlug($course->title);
             }
         });
+
+        static::deleting(function (Course $course) {
+            if ($course->isForceDeleting()) {
+                foreach ($course->lessons as $lesson) {
+                    $lesson->delete();
+                }
+
+                if ($course->thumbnail) {
+                    PublicStorage::delete($course->thumbnail);
+                }
+            }
+        });
+
+        static::updated(function (Course $course) {
+            if ($course->wasChanged('thumbnail') && $course->getOriginal('thumbnail')) {
+                PublicStorage::delete($course->getOriginal('thumbnail'));
+            }
+        });
     }
 
     public static function generateUniqueSlug(string $title, ?int $exceptId = null): string

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\PublicStorage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -48,6 +49,21 @@ class StudentProfile extends Model
         'hearts' => 5,
         'hearts_max' => 5,
     ];
+
+    protected static function booted(): void
+    {
+        static::deleting(function (StudentProfile $profile) {
+            if ($profile->avatar_url) {
+                PublicStorage::delete($profile->avatar_url);
+            }
+        });
+
+        static::updated(function (StudentProfile $profile) {
+            if ($profile->wasChanged('avatar_url') && $profile->getOriginal('avatar_url')) {
+                PublicStorage::delete($profile->getOriginal('avatar_url'));
+            }
+        });
+    }
 
     public function user(): BelongsTo
     {

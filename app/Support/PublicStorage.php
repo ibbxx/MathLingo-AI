@@ -75,10 +75,84 @@ final class PublicStorage
             return '';
         }
 
+        foreach (self::publicUrlBases() as $base) {
+            $html = preg_replace_callback(
+                '#(?<![A-Za-z0-9])' . preg_quote($base, '#') . '/([^"\'\s<>]+)#',
+                function (array $match): string {
+                    $path = self::extractPathFromUrl($match[0]);
+
+                    return self::url($path) ?? $match[0];
+                },
+                $html
+            ) ?? $html;
+        }
+
+        return $html;
+    }
+
+    public static function extractPathFromUrl(?string $url): ?string
+    {
+        if (! $url) {
+            return null;
+        }
+
+        $url = html_entity_decode(trim($url), ENT_QUOTES | ENT_HTML5);
+        $urlWithoutQuery = strtok($url, '?#') ?: $url;
+
+        foreach (self::publicUrlBases() as $base) {
+            if (str_starts_with($urlWithoutQuery, $base . '/')) {
+                return rawurldecode(ltrim(substr($urlWithoutQuery, strlen($base)), '/'));
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function imagePathsFromHtml(?string $html): array
+    {
+        if (! $html) {
+            return [];
+        }
+
+        preg_match_all('/<img\b[^>]*\bsrc\s*=\s*(?:"([^"]+)"|\'([^\']+)\'|([^\s>]+))/i', $html, $matches, PREG_SET_ORDER);
+
+        if (! $matches) {
+            return [];
+        }
+
+        $paths = [];
+        foreach ($matches as $match) {
+            $url = $match[1] ?: ($match[2] ?: ($match[3] ?? null));
+            $path = self::extractPathFromUrl($url);
+            if ($path) {
+                $paths[] = $path;
+            }
+        }
+
+        return array_values(array_unique($paths));
+    }
+
+    public static function deleteImagesFromHtml(?string $html): void
+    {
+        foreach (self::imagePathsFromHtml($html) as $path) {
+            self::delete($path);
+        }
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private static function publicUrlBases(): array
+    {
         $publicUrl = rtrim((string) config('filesystems.disks.public.url'), '/');
+        $s3Url = rtrim((string) config('filesystems.disks.s3.url'), '/');
         $appStorageUrl = rtrim((string) config('app.url'), '/') . '/storage';
 
-        $bases = array_values(array_unique(array_filter([
+        return array_values(array_unique(array_filter([
+            $s3Url,
             $publicUrl,
             $appStorageUrl,
             'http://127.0.0.1:8000/storage',
@@ -86,15 +160,5 @@ final class PublicStorage
             'http://localhost/storage',
             '/storage',
         ])));
-
-        foreach ($bases as $base) {
-            $html = preg_replace_callback(
-                '#(?<![A-Za-z0-9])' . preg_quote($base, '#') . '/([^"\'\s<>]+)#',
-                fn (array $match): string => self::url(rawurldecode($match[1])) ?? $match[0],
-                $html
-            ) ?? $html;
-        }
-
-        return $html;
     }
 }
