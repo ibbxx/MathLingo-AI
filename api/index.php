@@ -12,6 +12,16 @@ $_ENV['LARAVEL_STORAGE_PATH'] = '/tmp/storage';
 $_SERVER['LARAVEL_STORAGE_PATH'] = '/tmp/storage';
 putenv('LARAVEL_STORAGE_PATH=/tmp/storage');
 
+// Laravel may need to compile provider/package manifests on cold starts.
+// Vercel's deployment filesystem is read-only, so keep those caches in /tmp.
+$_ENV['APP_SERVICES_CACHE'] = '/tmp/bootstrap/cache/services.php';
+$_SERVER['APP_SERVICES_CACHE'] = '/tmp/bootstrap/cache/services.php';
+putenv('APP_SERVICES_CACHE=/tmp/bootstrap/cache/services.php');
+
+$_ENV['APP_PACKAGES_CACHE'] = '/tmp/bootstrap/cache/packages.php';
+$_SERVER['APP_PACKAGES_CACHE'] = '/tmp/bootstrap/cache/packages.php';
+putenv('APP_PACKAGES_CACHE=/tmp/bootstrap/cache/packages.php');
+
 // ── 2. Write SSL CA certificate from environment variable to /tmp ────────
 $sslCaContent = $_ENV['MYSQL_SSL_CA_CONTENT'] ?? getenv('MYSQL_SSL_CA_CONTENT') ?: null;
 
@@ -30,6 +40,7 @@ chdir(__DIR__ . '/..');
 
 // ── 4. Ensure writable directories exist in /tmp/storage ─────────────────
 $tmpDirs = [
+    '/tmp/bootstrap/cache',
     '/tmp/storage/framework/sessions',
     '/tmp/storage/framework/views',
     '/tmp/storage/framework/cache/data',
