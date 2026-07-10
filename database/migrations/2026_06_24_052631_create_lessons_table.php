@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->text('objectives')->nullable();
-            $table->enum('lesson_type', ['vocabulary', 'quiz', 'reading', 'exercise', 'video'])->default('vocabulary')->index();
+            $table->enum('lesson_type', ['vocabulary', 'quiz', 'reading', 'exercise', 'video', 'grammar', 'practice'])->default('vocabulary')->index();
             $table->unsignedInteger('duration_minutes')->default(0);
             $table->unsignedInteger('xp_reward')->default(0);
             $table->unsignedInteger('sort_order')->default(0)->index();

@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('question');
             $table->enum('question_type', [
                 'multiple_choice', 'fill_blank', 'matching',
-                'ordering', 'typing', 'short_answer', 'essay',
+                'ordering', 'typing', 'short_answer', 'essay', 'word_arrange',
             ])->default('multiple_choice')->index();
             $table->json('options')->nullable();
             $table->text('correct_answer');

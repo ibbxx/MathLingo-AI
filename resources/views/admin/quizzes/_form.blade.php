@@ -339,7 +339,7 @@
                     <div class="form-group">
                         <label class="form-label" for="sort_order">Sort Order <span>*</span></label>
                         <input type="number" id="sort_order" name="sort_order" class="form-input" min="0" required
-                               value="{{ old('sort_order', $isEdit ? $quiz->sort_order : 1) }}"
+                               value="{{ old('sort_order', $isEdit ? $quiz->sort_order : 1) }}">
                         @error('sort_order')<div class="form-error">{{ $message }}</div>@enderror
                     </div>
 
